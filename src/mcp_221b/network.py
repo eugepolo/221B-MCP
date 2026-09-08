@@ -39,7 +39,7 @@ class Network:
             timeout=20,
             follow_redirects=False,
             trust_env=False,
-            headers={"User-Agent": "osint-mcp/0.1 (+public-source-research)"},
+            headers={"User-Agent": "221b-mcp/0.1 (+public-source-research)"},
             limits=httpx.Limits(max_connections=10, max_keepalive_connections=5),
         )
         self.slots = asyncio.Semaphore(5)

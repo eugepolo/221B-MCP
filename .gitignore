@@ -8,4 +8,4 @@ dist/
 .env
 .env.*
 !.env.example
-.osint-mcp/
+.221b-mcp/

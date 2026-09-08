@@ -3,7 +3,7 @@ requires = ["hatchling>=1.27"]
 build-backend = "hatchling.build"
 
 [project]
-name = "osint-mcp"
+name = "221b-mcp"
 version = "0.1.0"
 description = "Local MCP tools for public-source investigations with traceable evidence"
 readme = "README.md"
@@ -22,10 +22,10 @@ sherlock = ["sherlock-project>=0.16,<0.17"]
 dev = ["pytest>=8,<10", "pytest-asyncio>=0.25,<2", "ruff>=0.11,<1"]
 
 [project.scripts]
-osint-mcp = "osint_mcp.cli:main"
+221b-mcp = "mcp_221b.cli:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/osint_mcp"]
+packages = ["src/mcp_221b"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

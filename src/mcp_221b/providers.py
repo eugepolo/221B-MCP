@@ -13,11 +13,11 @@ import dns.asyncresolver
 import dns.exception
 from bs4 import BeautifulSoup
 
-from osint_mcp.config import brave_key, search_provider
-from osint_mcp.evidence import Finding, Result
-from osint_mcp.executables import sherlock_command
-from osint_mcp.network import FetchError, Network
-from osint_mcp.username_presets import Depth, select_sites
+from mcp_221b.config import brave_key, search_provider
+from mcp_221b.evidence import Finding, Result
+from mcp_221b.executables import sherlock_command
+from mcp_221b.network import FetchError, Network
+from mcp_221b.username_presets import Depth, select_sites
 
 
 class Providers:
@@ -40,7 +40,7 @@ class Providers:
         key = brave_key()
         if not key:
             raise ValueError(
-                "Web search needs BRAVE_API_KEY. Run osint-mcp init or set it in the environment."
+                "Web search needs BRAVE_API_KEY. Run 221b-mcp init or set it in the environment."
             )
         async with self.brave_slot:
             try:
@@ -77,7 +77,7 @@ class Providers:
             process = await asyncio.create_subprocess_exec(
                 sys.executable,
                 "-m",
-                "osint_mcp.search_worker",
+                "mcp_221b.search_worker",
                 stdin=asyncio.subprocess.PIPE,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.DEVNULL,
@@ -302,7 +302,7 @@ class Providers:
                 "Sherlock is not installed. Install this package with the [sherlock] extra."
             )
         async with self.sherlock_slot:
-            with tempfile.TemporaryDirectory(prefix="osint-sherlock-") as directory:
+            with tempfile.TemporaryDirectory(prefix="221b-sherlock-") as directory:
                 args = [executable, "--csv", "--print-all", "--no-color", "--timeout", "10"]
                 if selected is None:
                     # Include adult sites; retain upstream false-positive exclusions.

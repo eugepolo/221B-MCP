@@ -4,8 +4,8 @@ import argparse
 import getpass
 import json
 
-from osint_mcp import __version__
-from osint_mcp.config import (
+from mcp_221b import __version__
+from mcp_221b.config import (
     brave_key,
     config_path,
     data_path,
@@ -13,8 +13,8 @@ from osint_mcp.config import (
     save_config,
     search_provider,
 )
-from osint_mcp.executables import sherlock_command
-from osint_mcp.logging_setup import configure_logging, log_directory, logger
+from mcp_221b.executables import sherlock_command
+from mcp_221b.logging_setup import configure_logging, log_directory, logger
 
 
 def main():
@@ -58,6 +58,6 @@ def main():
     else:
         configure_logging()
         logger.info("server_starting")
-        from osint_mcp.server import mcp
+        from mcp_221b.server import mcp
 
         mcp.run(transport="stdio")

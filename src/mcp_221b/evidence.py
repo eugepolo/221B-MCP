@@ -10,7 +10,7 @@ from uuid import uuid4
 
 from pydantic import BaseModel, Field
 
-from osint_mcp.config import data_path
+from mcp_221b.config import data_path
 
 
 class Finding(BaseModel):
@@ -56,7 +56,7 @@ def export_records(record_ids: list[str], format: Literal["json", "markdown"] = 
     # Indented code preserves evidence verbatim without interpreting remote HTML/Markdown.
     content = json.dumps(records, indent=2, ensure_ascii=False)
     if format == "markdown":
-        content = "# OSINT evidence\n\n" + "\n".join("    " + line for line in content.splitlines())
+        content = "# 221B evidence\n\n" + "\n".join("    " + line for line in content.splitlines())
     path = data_path() / "exports" / f"{uuid4().hex}.{'json' if format == 'json' else 'md'}"
     write_private(path, content + "\n")
     return {"path": str(path.resolve()), "records": len(records), "format": format}

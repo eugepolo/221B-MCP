@@ -9,13 +9,13 @@ from platformdirs import user_config_path, user_data_path
 
 
 def config_path() -> Path:
-    override = os.environ.get("OSINT_MCP_CONFIG")
-    return Path(override) if override else user_config_path("osint-mcp") / "config.json"
+    override = os.environ.get("MCP_221B_CONFIG")
+    return Path(override) if override else user_config_path("221b-mcp") / "config.json"
 
 
 def data_path() -> Path:
-    override = os.environ.get("OSINT_MCP_DATA_DIR")
-    return Path(override) if override else user_data_path("osint-mcp")
+    override = os.environ.get("MCP_221B_DATA_DIR")
+    return Path(override) if override else user_data_path("221b-mcp")
 
 
 def read_config() -> dict:
@@ -33,7 +33,7 @@ def brave_key() -> str:
 
 
 def search_provider() -> str:
-    provider = os.environ.get("OSINT_MCP_SEARCH_PROVIDER") or read_config().get(
+    provider = os.environ.get("MCP_221B_SEARCH_PROVIDER") or read_config().get(
         "search_provider", "keyless"
     )
     if provider not in {"keyless", "brave"}:

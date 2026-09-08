@@ -10,15 +10,15 @@ from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from uuid import uuid4
 
-from osint_mcp.config import data_path
+from mcp_221b.config import data_path
 
-logger = logging.getLogger("osint_mcp")
+logger = logging.getLogger("mcp_221b")
 
 
 def log_directory() -> Path:
     return (
-        Path(os.environ["OSINT_MCP_LOG_DIR"])
-        if os.environ.get("OSINT_MCP_LOG_DIR")
+        Path(os.environ["MCP_221B_LOG_DIR"])
+        if os.environ.get("MCP_221B_LOG_DIR")
         else (data_path() / "logs")
     )
 
@@ -43,9 +43,9 @@ class PrivateRotatingHandler(RotatingFileHandler):
 
 
 def configure_logging() -> Path:
-    level = os.environ.get("OSINT_MCP_LOG_LEVEL", "INFO").upper()
+    level = os.environ.get("MCP_221B_LOG_LEVEL", "INFO").upper()
     if level not in {"DEBUG", "INFO", "WARNING", "ERROR"}:
-        raise ValueError("OSINT_MCP_LOG_LEVEL must be DEBUG, INFO, WARNING or ERROR.")
+        raise ValueError("MCP_221B_LOG_LEVEL must be DEBUG, INFO, WARNING or ERROR.")
     directory = log_directory()
     directory.mkdir(parents=True, exist_ok=True, mode=0o700)
     path = directory / f"server-{os.getpid()}.jsonl"
