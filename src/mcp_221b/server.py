@@ -6,7 +6,7 @@ from mcp.server.fastmcp import FastMCP
 
 from mcp_221b.logging_setup import logger
 from mcp_221b.network import Network
-from mcp_221b.providers import Providers
+from mcp_221b.runtime import ToolHandlers
 from mcp_221b.tools import register_tools
 
 
@@ -15,7 +15,7 @@ async def lifespan(server: FastMCP):
     network = Network()
     logger.info("server_ready")
     try:
-        yield Providers(network)
+        yield ToolHandlers(network)
     finally:
         await network.close()
         logger.info("server_stopped")

@@ -8,7 +8,7 @@ from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
 from mcp_221b.evidence import Result, record
-from mcp_221b.providers import Providers as ToolHandlers
+from mcp_221b.runtime import ToolHandlers
 
 
 async def test_missing_key_does_not_make_request():

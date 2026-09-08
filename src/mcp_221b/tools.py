@@ -5,9 +5,10 @@ from typing import Literal
 
 from mcp.server.fastmcp import Context, FastMCP
 
-from mcp_221b.evidence import Finding, Result, export_records, record
+from mcp_221b.evidence import Finding, Result, record
 from mcp_221b.logging_setup import logged_tool
 from mcp_221b.network import FetchError
+from mcp_221b.tool_handlers.export_findings import export_findings as export_handler
 from mcp_221b.username_presets import Depth
 
 
@@ -84,7 +85,7 @@ async def export_findings(
     record_ids: list[str], format: Literal["json", "markdown"] = "json"
 ) -> dict:
     """Export 1–100 existing evidence record IDs to a new local JSON or Markdown file."""
-    return await asyncio.to_thread(export_records, record_ids, format)
+    return await export_handler(record_ids, format)
 
 
 TOOLS = (search_username, search_web, inspect_page, lookup_domain, search_archives, export_findings)
