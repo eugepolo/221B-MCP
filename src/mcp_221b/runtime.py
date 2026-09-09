@@ -6,6 +6,7 @@ from mcp_221b.tool_handlers.lookup_domain import LookupDomain
 from mcp_221b.tool_handlers.search_archives import SearchArchives
 from mcp_221b.tool_handlers.search_username import SearchUsername
 from mcp_221b.tool_handlers.search_web import SearchWeb
+from mcp_221b.tool_handlers.shodan import Shodan
 
 
 class ToolHandlers:
@@ -16,3 +17,7 @@ class ToolHandlers:
         self.inspect_page = InspectPage(network).inspect_page
         self.lookup_domain = LookupDomain(network).lookup_domain
         self.search_archives = SearchArchives(network).search_archives
+
+        self.shodan = Shodan(network)
+        self.lookup_shodan_host = self.shodan.lookup_shodan_host
+        self.search_shodan = self.shodan.search_shodan

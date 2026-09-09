@@ -88,7 +88,35 @@ async def export_findings(
     return await export_handler(record_ids, format)
 
 
-TOOLS = (search_username, search_web, inspect_page, lookup_domain, search_archives, export_findings)
+@logged_tool
+async def lookup_shodan_host(ip: str, ctx: Context) -> dict:
+    """Retrieve Shodan's recorded services for a public IP. Requires a Shodan API key.
+
+    Returns up to 100 services and bounded banner excerpts. Observations are not live checks.
+    """
+    return await collect(ctx, "lookup_shodan_host", ip)
+
+
+@logged_tool
+async def search_shodan(query: str, ctx: Context, limit: int = 10, page: int = 1) -> dict:
+    """Search Shodan's indexed services using native filters. Requires a Shodan API key.
+
+    May consume query credits. Fetches one explicit page of up to 100 services; limit (1–100)
+    caps returned evidence, not credit usage. No automatic pagination or retries.
+    """
+    return await collect(ctx, "search_shodan", query, limit=limit, page=page)
+
+
+TOOLS = (
+    search_username,
+    search_web,
+    inspect_page,
+    lookup_domain,
+    search_archives,
+    export_findings,
+    lookup_shodan_host,
+    search_shodan,
+)
 
 
 def register_tools(mcp: FastMCP) -> None:

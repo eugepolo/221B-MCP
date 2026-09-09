@@ -2,10 +2,23 @@
 
 import asyncio
 import ipaddress
+import logging
 import socket
 from urllib.parse import urljoin, urlsplit
 
 import httpx
+
+
+class _SecretRequestFilter(logging.Filter):
+    def filter(self, record):
+        # HTTPX logs request URLs at INFO, including provider query-string keys.
+        if "key=" in record.getMessage().lower():
+            record.msg = "Authenticated HTTP request (URL omitted)."
+            record.args = ()
+        return True
+
+
+_secret_filter = _SecretRequestFilter()
 
 
 class FetchError(Exception):
@@ -35,6 +48,15 @@ async def validate_public_url(url: str) -> None:
 
 class Network:
     def __init__(self):
+        for name in (
+            "httpx",
+            "httpcore.connection",
+            "httpcore.http11",
+            "httpcore.http2",
+            "httpcore.proxy",
+            "httpcore.socks",
+        ):
+            logging.getLogger(name).addFilter(_secret_filter)
         self.client = httpx.AsyncClient(
             timeout=20,
             follow_redirects=False,
@@ -47,7 +69,9 @@ class Network:
     async def close(self):
         await self.client.aclose()
 
-    async def get(self, url: str, *, params=None, headers=None) -> httpx.Response:
+    async def get(
+        self, url: str, *, params=None, headers=None, allow_redirects: bool = True
+    ) -> httpx.Response:
         async with self.slots:
             try:
                 async with asyncio.timeout(45):
@@ -57,6 +81,8 @@ class Network:
                             "GET", url, params=params, headers=headers
                         ) as response:
                             if response.is_redirect:
+                                if not allow_redirects:
+                                    raise FetchError("Source returned an unexpected redirect.")
                                 location = response.headers.get("location")
                                 if not location:
                                     raise FetchError("Redirect has no destination.")

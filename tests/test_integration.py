@@ -67,6 +67,8 @@ async def test_stdio_handshake_tool_listing_and_export():
                 "lookup_domain",
                 "search_archives",
                 "export_findings",
+                "lookup_shodan_host",
+                "search_shodan",
             }
             for tool in tools.tools:
                 assert "ctx" not in tool.inputSchema.get("properties", {})
