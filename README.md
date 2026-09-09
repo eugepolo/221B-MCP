@@ -42,6 +42,8 @@ web UI or HTTP endpoint. Try asking: **“Use 221B to inspect https://example.or
 | `search_username` | Find candidate accounts using locally installed Sherlock |
 | `inspect_page` | Extract text, links, and email addresses from public HTML/text pages |
 | `lookup_domain` | Look up DNS records and available RDAP registration data |
+| `lookup_shodan_host` | Retrieve recorded services for a public IP using an optional Shodan key |
+| `search_shodan` | Search Shodan's indexed services using native query filters |
 | `search_archives` | Find Wayback captures of an exact URL |
 | `export_findings` | Export saved evidence IDs as JSON or Markdown |
 
@@ -64,6 +66,34 @@ For containers, set `BRAVE_API_KEY_FILE` to a mounted UTF-8 file containing the 
 Credential precedence is **secret file → `BRAVE_API_KEY` environment → OS store**.
 
 Choose `provider="brave"` on a call, or set `MCP_221B_SEARCH_PROVIDER=brave`; a key alone does not switch providers.
+
+### Shodan
+
+Run `221b-mcp init` and choose to configure Shodan, or supply `SHODAN_API_KEY_FILE`
+or `SHODAN_API_KEY`. Precedence is **secret file → environment → OS store**, using
+a separate credential from Brave. Shodan is optional and independent of the web-search
+provider. `doctor` reports local credential status without making an API call or checking
+your subscription. Restart your MCP client after installing the updated server.
+
+Examples of tool arguments:
+
+```text
+lookup_shodan_host(ip="8.8.8.8")
+search_shodan(query='org:"Example" port:443', limit=10, page=1)
+```
+
+Host lookup returns general host information and up to 100 recorded services. Search
+returns service observations, so an IP can appear more than once for different services.
+`limit` accepts 1–100 (default 10); `page` starts at 1. Each search fetches exactly one
+Shodan page of up to 100 services and then applies the output limit. A smaller limit does
+not reduce API credit usage. Results report the total matches and any omitted page results.
+
+Search requires suitable account access and can consume query credits, including for
+filtered queries and later pages; see the [Shodan API documentation](https://developer.shodan.io/api).
+There is no automatic pagination or retry. Both tools read existing Shodan observations;
+they do not initiate scans. Observation timestamps are separate from retrieval timestamps,
+and recorded ports do not establish current reachability. Banner excerpts are limited to
+2,000 characters with truncation indicated. Responses retain the shared 2 MB HTTP limit.
 
 `221b-mcp doctor` shows configuration, evidence, and log paths. OS-store presence is
 reported from setup metadata, without unlocking or verifying the store. Override them with
@@ -101,6 +131,14 @@ docker run --rm -i -v 221b-data:/data \
 The file must be readable by container UID 10001. Mounted files are not encrypted by
 221B; protect the host file or use your deployment's secret manager. `secrets/` is excluded
 from Git and Docker builds. Host OS credentials are not automatically shared with containers.
+
+For Shodan, use the same mounted-secret pattern:
+
+```sh
+docker run --rm -i -v 221b-data:/data \
+  --mount type=bind,src=/absolute/path/shodan-key,dst=/run/secrets/shodan,readonly \
+  -e SHODAN_API_KEY_FILE=/run/secrets/shodan 221b-mcp
+```
 
 ## Development
 
