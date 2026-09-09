@@ -6,13 +6,13 @@ import json
 
 from mcp_221b import __version__
 from mcp_221b.config import (
-    brave_key,
     config_path,
     data_path,
     read_config,
     save_config,
     search_provider,
 )
+from mcp_221b.credentials import CredentialError, credential_status, save_brave_key
 from mcp_221b.executables import sherlock_command
 from mcp_221b.logging_setup import configure_logging, log_directory, logger
 
@@ -34,19 +34,30 @@ def main():
             print("Choose keyless or brave.")
         config["search_provider"] = provider
         if provider == "brave":
-            print("Keys are stored as local plaintext (owner-only on POSIX).")
+            print("The key will be saved in your OS credential store.")
             key = getpass.getpass("Brave API key (Enter to keep current setting or skip): ").strip()
             if key:
-                config["brave_api_key"] = key
+                try:
+                    save_brave_key(key)
+                except CredentialError as exc:
+                    parser.exit(1, f"{exc}\n")
+                config["brave_key_storage"] = "keyring"
+                config.pop("brave_api_key", None)
+        if "brave_api_key" in config:
+            parser.exit(
+                1, "Re-enter the key to replace the old plaintext setting, or remove that field.\n"
+            )
         print(f"Configuration saved to {save_config(config)}")
     elif args.command == "doctor":
+        credentials = credential_status()
         print(
             json.dumps(
                 {
                     "version": __version__,
                     "config_path": str(config_path()),
                     "data_path": str(data_path()),
-                    "brave_configured": bool(brave_key()),
+                    "brave_configured": credentials["configured"],
+                    "brave_credentials": credentials,
                     "search_provider": search_provider(),
                     "sherlock_installed": sherlock_command() is not None,
                     "transport": "stdio",

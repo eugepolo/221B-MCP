@@ -29,7 +29,9 @@ def read_config() -> dict:
 
 
 def brave_key() -> str:
-    return os.environ.get("BRAVE_API_KEY", "") or read_config().get("brave_api_key", "")
+    from mcp_221b.credentials import load_brave_key
+
+    return load_brave_key()
 
 
 def search_provider() -> str:
@@ -42,6 +44,8 @@ def search_provider() -> str:
 
 
 def save_config(config: dict) -> Path:
+    if "brave_api_key" in config:
+        raise ValueError("API keys cannot be written to configuration. Use OS credential storage.")
     path = config_path()
     path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
     fd, temporary = tempfile.mkstemp(dir=path.parent, prefix=".config-")

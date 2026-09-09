@@ -2,15 +2,16 @@ import json
 import os
 import stat
 
-from mcp_221b.config import brave_key, save_config
+import pytest
+
+from mcp_221b.config import save_config
 
 
-def test_config_private_and_environment_precedence(monkeypatch):
-    path = save_config({"brave_api_key": "saved"})
-    assert brave_key() == "saved"
+def test_config_private_and_contains_no_keys():
+    path = save_config({"brave_key_storage": "keyring", "search_provider": "brave"})
     if os.name == "posix":
         assert stat.S_IMODE(path.stat().st_mode) == 0o600
-    monkeypatch.setenv("BRAVE_API_KEY", "environment")
-    assert brave_key() == "environment"
-    save_config({"brave_api_key": "replacement"})
-    assert json.loads(path.read_text())["brave_api_key"] == "replacement"
+    assert "brave_api_key" not in json.loads(path.read_text())
+    with pytest.raises(ValueError):
+        save_config({"brave_api_key": "never-write-this"})
+    assert "never-write-this" not in path.read_text()

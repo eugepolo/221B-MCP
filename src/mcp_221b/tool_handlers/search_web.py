@@ -25,11 +25,9 @@ class SearchWeb:
             return await self._search_keyless(query, limit)
         if selected != "brave":
             raise ValueError("Search provider must be keyless or brave.")
-        key = brave_key()
+        key = await asyncio.to_thread(brave_key)
         if not key:
-            raise ValueError(
-                "Web search needs BRAVE_API_KEY. Run 221b-mcp init or set it in the environment."
-            )
+            raise ValueError("Brave needs a key. Run 221b-mcp init or set BRAVE_API_KEY_FILE.")
         async with self.brave_slot:
             try:
                 response = await self.network.get(

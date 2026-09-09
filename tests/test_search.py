@@ -20,7 +20,7 @@ def config(tmp_path, monkeypatch):
 
 
 def test_provider_default_and_overrides(monkeypatch):
-    save_config({"brave_api_key": "existing-key"})
+    save_config({"brave_key_storage": "keyring"})
     assert search_provider() == "keyless"
     save_config({"search_provider": "brave"})
     assert search_provider() == "brave"
@@ -131,9 +131,9 @@ def test_init_keyless_does_not_ask_for_key(monkeypatch):
 
 
 def test_init_brave_retains_key(monkeypatch):
-    save_config({"brave_api_key": "saved"})
+    save_config({"brave_key_storage": "keyring"})
     monkeypatch.setattr("sys.argv", ["221b-mcp", "init"])
     monkeypatch.setattr("builtins.input", lambda _: "brave")
     monkeypatch.setattr("mcp_221b.cli.getpass.getpass", lambda _: "")
     main()
-    assert read_config() == {"brave_api_key": "saved", "search_provider": "brave"}
+    assert read_config() == {"brave_key_storage": "keyring", "search_provider": "brave"}
