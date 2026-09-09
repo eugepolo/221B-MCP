@@ -12,7 +12,7 @@ from mcp_221b.config import (
     save_config,
     search_provider,
 )
-from mcp_221b.credentials import CredentialError, credential_status, save_brave_key
+from mcp_221b.credentials import CredentialError, credential_status, save_brave_key, save_shodan_key
 from mcp_221b.executables import sherlock_command
 from mcp_221b.logging_setup import configure_logging, log_directory, logger
 
@@ -47,9 +47,24 @@ def main():
             parser.exit(
                 1, "Re-enter the key to replace the old plaintext setting, or remove that field.\n"
             )
+        configure_shodan = input("Configure Shodan API key? [y/N]: ").strip().lower()
+        if configure_shodan in {"y", "yes"}:
+            key = getpass.getpass(
+                "Shodan API key (Enter to keep current setting or skip): "
+            ).strip()
+            if key:
+                try:
+                    save_shodan_key(key)
+                except CredentialError as exc:
+                    parser.exit(1, f"{exc}\n")
+                config["shodan_key_storage"] = "keyring"
+                config.pop("shodan_api_key", None)
+        if "shodan_api_key" in config:
+            parser.exit(1, "Re-enter the Shodan key or remove the plaintext setting.\n")
         print(f"Configuration saved to {save_config(config)}")
     elif args.command == "doctor":
         credentials = credential_status()
+        shodan_credentials = credential_status("shodan")
         print(
             json.dumps(
                 {
@@ -58,6 +73,8 @@ def main():
                     "data_path": str(data_path()),
                     "brave_configured": credentials["configured"],
                     "brave_credentials": credentials,
+                    "shodan_configured": shodan_credentials["configured"],
+                    "shodan_credentials": shodan_credentials,
                     "search_provider": search_provider(),
                     "sherlock_installed": sherlock_command() is not None,
                     "transport": "stdio",

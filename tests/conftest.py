@@ -8,3 +8,6 @@ def isolated_config(tmp_path, monkeypatch):
     monkeypatch.delenv("BRAVE_API_KEY", raising=False)
     monkeypatch.delenv("MCP_221B_SEARCH_PROVIDER", raising=False)
     monkeypatch.delenv("BRAVE_API_KEY_FILE", raising=False)
+
+    monkeypatch.delenv("SHODAN_API_KEY", raising=False)
+    monkeypatch.delenv("SHODAN_API_KEY_FILE", raising=False)

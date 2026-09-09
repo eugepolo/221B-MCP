@@ -44,7 +44,7 @@ def search_provider() -> str:
 
 
 def save_config(config: dict) -> Path:
-    if "brave_api_key" in config:
+    if {"brave_api_key", "shodan_api_key"} & config.keys():
         raise ValueError("API keys cannot be written to configuration. Use OS credential storage.")
     path = config_path()
     path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)

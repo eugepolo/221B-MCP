@@ -140,3 +140,61 @@ def test_unavailable_backend_has_no_fallback(monkeypatch):
     with pytest.raises(credentials.CredentialError, match="No plaintext fallback"):
         ORIGINAL_BACKEND()
     assert imported.call_count == 1
+
+
+def test_credentials_are_independent(tmp_path, monkeypatch):
+    store = Mock()
+    keys = {}
+    store.set_password.side_effect = lambda service, account, value: keys.update({account: value})
+    store.get_password.side_effect = lambda service, account: keys.get(account)
+    monkeypatch.setattr(credentials, "_os_backend", lambda: store)
+    credentials.save_brave_key("brave-secret")
+    credentials.save_shodan_key("shodan-secret")
+    save_config({"brave_key_storage": "keyring", "shodan_key_storage": "keyring"})
+    assert credentials.load_brave_key() == "brave-secret"
+    assert credentials.load_shodan_key() == "shodan-secret"
+    monkeypatch.setenv("SHODAN_API_KEY", "environment-secret")
+    assert credentials.load_shodan_key() == "environment-secret"
+    secret = tmp_path / "shodan"
+    secret.write_text("file-secret\n")
+    monkeypatch.setenv("SHODAN_API_KEY_FILE", str(secret))
+    assert credentials.load_shodan_key() == "file-secret"
+    secret.write_text("")
+    with pytest.raises(credentials.CredentialError):
+        credentials.load_shodan_key()
+    assert not credentials.credential_status("shodan")["configured"]
+
+
+def test_plaintext_shodan_key_rejected():
+    with pytest.raises(ValueError):
+        save_config({"shodan_api_key": "secret"})
+    config_path().write_text('{"shodan_api_key": "secret"}')
+    with pytest.raises(credentials.CredentialError, match="Plaintext"):
+        credentials.load_shodan_key()
+    assert credentials.credential_status("shodan")["source"] == "unsupported_plaintext"
+
+
+def test_init_shodan_independent_of_brave(monkeypatch, capsys):
+    store = Mock()
+    store.get_password.return_value = "shodan-secret"
+    monkeypatch.setattr(credentials, "_os_backend", lambda: store)
+    monkeypatch.setattr("sys.argv", ["221b-mcp", "init"])
+    answers = iter(["keyless", "y"])
+    monkeypatch.setattr("builtins.input", lambda _: next(answers))
+    monkeypatch.setattr("mcp_221b.cli.getpass.getpass", lambda _: "shodan-secret")
+    main()
+    assert read_config() == {"search_provider": "keyless", "shodan_key_storage": "keyring"}
+    store.set_password.assert_called_once_with("221b-mcp", "shodan-api-key", "shodan-secret")
+    assert "shodan-secret" not in capsys.readouterr().out + config_path().read_text()
+
+
+def test_doctor_does_not_open_store(monkeypatch, capsys):
+    save_config({"shodan_key_storage": "keyring"})
+    monkeypatch.setattr("sys.argv", ["221b-mcp", "doctor"])
+    main()
+    data = json.loads(capsys.readouterr().out)
+    assert data["shodan_credentials"] == {
+        "source": "keyring",
+        "configured": True,
+        "verified": False,
+    }
