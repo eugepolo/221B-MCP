@@ -6,13 +6,23 @@ No API keys required by default.
 
 ## Quick start
 
-Requires Python 3.11+.
+Requires Git and Python 3.11+.
+
+On macOS or Linux:
 
 ```sh
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install '.[sherlock]'
 221b-mcp doctor
+```
+
+On Windows:
+
+```powershell
+py -3 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install ".[sherlock]"
+.\.venv\Scripts\221b-mcp.exe doctor
 ```
 
 The `sherlock` extra enables username searches. Skip it with `pip install .` if you only
@@ -152,3 +162,7 @@ pytest -q
 `server.py` owns the lifecycle, `tools.py` defines the public tools, and
 `tool_handlers/` holds their implementations. `runtime.py` connects handlers to shared
 services. Tests cover handlers and a real local MCP handshake without live web requests.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
