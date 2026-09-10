@@ -50,7 +50,7 @@ def export_records(record_ids: list[str], format: Literal["json", "markdown"] = 
         path = data_path() / "evidence" / f"{record_id}.json"
         if not path.is_file():
             raise ValueError(f"Evidence record {record_id} does not exist.")
-        records.append(json.loads(path.read_text()))
+        records.append(json.loads(path.read_text(encoding="utf-8")))
     if format not in {"json", "markdown"}:
         raise ValueError("Export format must be json or markdown.")
     # Indented code preserves evidence verbatim without interpreting remote HTML/Markdown.
